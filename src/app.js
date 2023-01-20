@@ -38,10 +38,11 @@ app.use(errorHandler);
 
 mongoose.connect(config.mongoose.url,config.mongoose.options).then(()=>{
     console.log("Connected to MongoDB");
-    // Start the Node server
-    app.listen(config.port, () => {
-        console.log(`App is running on port ${config.port}`);
-    });
+});
+
+// Start the Node server
+app.listen(config.port, () => {
+    console.log(`App is running on port ${config.port}`);
 });
 
 module.exports = app;
