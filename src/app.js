@@ -1,6 +1,8 @@
 const express = require("express");
 const compression = require("compression");
 const cors = require("cors");
+const mongoose = require("mongoose");
+const config = require("./config/config");
 const httpStatus = require("http-status");
 const routes = require("./routes/v1");
 const { errorHandler } = require("./middlewares/error");
@@ -33,5 +35,13 @@ app.use((req, res, next) => {
 
 // handle error
 app.use(errorHandler);
+
+mongoose.connect(config.mongoose.url,config.mongoose.options).then(()=>{
+    console.log("Connected to MongoDB");
+    // Start the Node server
+    app.listen(config.port, () => {
+        console.log(`App is running on port ${config.port}`);
+    });
+});
 
 module.exports = app;

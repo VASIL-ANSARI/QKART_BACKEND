@@ -3,7 +3,6 @@ const mongoose = require("mongoose");
 const validator = require("validator");
 const config = require("../config/config");
 
-// TODO: CRIO_TASK_MODULE_UNDERSTANDING_BASICS - Complete userSchema, a Mongoose schema for "users" collection
 const userSchema = mongoose.Schema(
   {
     name: {
@@ -12,42 +11,57 @@ const userSchema = mongoose.Schema(
       trim: true,
     },
     email: {
+      type: String,
+      required: true,
+      trim: true,
+      unique: true,
+      lowercase: true,
+      validate: (value) => {
+        return validator.isEmail(value)
+      }
     },
     password: {
       type: String,
+      required: true,
+      trim: true,
       validate(value) {
         if (!value.match(/\d/) || !value.match(/[a-zA-Z]/)) {
           throw new Error(
             "Password must contain at least one letter and one number"
           );
         }
+        if(value.length < 8){
+          throw new Error(
+            "Password must be more than 8 characters"
+          );
+        }
       },
     },
     walletMoney: {
+      type: Number,
+      required: true,
+      default: config.default_wallet_money,
     },
     address: {
       type: String,
       default: config.default_address,
     },
   },
-  // Create createdAt and updatedAt fields automatically
   {
     timestamps: true,
   }
 );
 
-// TODO: CRIO_TASK_MODULE_UNDERSTANDING_BASICS - Implement the isEmailTaken() static method
 /**
  * Check if email is taken
  * @param {string} email - The user's email
  * @returns {Promise<boolean>}
  */
 userSchema.statics.isEmailTaken = async function (email) {
+  (await User.find({email: email})).length !== 0;
 };
 
 
-
-// TODO: CRIO_TASK_MODULE_UNDERSTANDING_BASICS
 /*
  * Create a Mongoose model out of userSchema and export the model as "User"
  * Note: The model should be accessible in a different module when imported like below
@@ -56,3 +70,7 @@ userSchema.statics.isEmailTaken = async function (email) {
 /**
  * @typedef User
  */
+const User = mongoose.model('User', userSchema);
+module.exports = {
+  User,
+};
