@@ -53,7 +53,6 @@ const verifyCallback = (req, resolve, reject) => async (err, user, info) => {
  * 
  */
 const auth = async (req, res, next) => {
-  
   return new Promise((resolve, reject) => {
     passport.authenticate(
       "jwt",

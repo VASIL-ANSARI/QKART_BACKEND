@@ -86,10 +86,9 @@ const setAddress = catchAsync(async (req, res) => {
 
   const address = await userService.setAddress(user, req.body.address);
 
-  const response = {address: address};
-  console.log(response);
-
-  res.send(response);
+  res.send({
+    address: address,
+  });
 });
 
 module.exports = {

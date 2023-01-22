@@ -32,7 +32,6 @@ const { cartService } = require("../services");
  *
  */
 const getCart = catchAsync(async (req, res) => {
-  //console.log(req.user);
   const cart = await cartService.getCartByUser(req.user);
   res.send(cart);
 });
@@ -72,8 +71,6 @@ const updateProductInCart = catchAsync(async (req, res) => {
   const productId = req.body.productId;
   const user = req.user;
 
-  //console.log(updatedQty, productId);
-
   if(updatedQty > 0){
     const cart = await cartService.updateProductInCart(user,productId,updatedQty);
     res.status(200).send(cart);
@@ -83,9 +80,18 @@ const updateProductInCart = catchAsync(async (req, res) => {
   }
 });
 
+/**
+ * Checkout user's cart
+ */
+const checkout = catchAsync(async (req, res) => {
+  //console.log(req.user);
+  await cartService.checkout(req.user);
+  res.status(204).send();
+});
 
 module.exports = {
   getCart,
   addProductToCart,
   updateProductInCart,
+  checkout,
 };

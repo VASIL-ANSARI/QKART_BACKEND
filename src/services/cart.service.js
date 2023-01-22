@@ -2,7 +2,6 @@ const httpStatus = require("http-status");
 const { Cart, Product } = require("../models");
 const ApiError = require("../utils/ApiError");
 const config = require("../config/config");
-const { isElementAccessExpression } = require("typescript");
 
 
 /**
@@ -165,10 +164,51 @@ const deleteProductFromCart = async (user, productId) => {
   return Cart.findByIdAndUpdate(idToUpdate,cart);
 };
 
+/**
+ * Checkout a users cart.
+ * On success, users cart must have no products.
+ *
+ * @param {User} user
+ * @returns {Promise}
+ * @throws {ApiError} when cart is invalid
+ */
+const checkout = async (user) => {
+  let cart = await Cart.findOne({email: user.email});
+  // console.log(cart);
+  if(!cart){
+    throw new ApiError(httpStatus.NOT_FOUND,"User does not have a cart");
+  }
+  if(cart.cartItems.length === 0){
+    throw new ApiError(httpStatus.BAD_REQUEST,"No product found");
+  }
+  const result = await user.hasSetNonDefaultAddress();
+  //console.log(result);
+  if(!result){
+    throw new ApiError(httpStatus.BAD_REQUEST,"No address found");
+  }
+  let total = 0;
+  const listsOfProducts = cart.cartItems;
+ // console.log(listsOfProducts);
+  for(const prod of listsOfProducts){
+    //console.log(prod);
+    total = total + prod.quantity * prod.product.cost;
+  }
+  if(total > user.walletMoney){
+    throw new ApiError(httpStatus.BAD_REQUEST,"Insufficient balance");
+  }
+  user.walletMoney  = user.walletMoney - total;
+  //console.log(user);
+  //await user.save();
+  cart.cartItems = [];
+  //console.log(cart);
+  await cart.save();
+  return cart;
+};
 
 module.exports = {
   getCartByUser,
   addProductToCart,
   updateProductInCart,
   deleteProductFromCart,
+  checkout,
 };
