@@ -2,7 +2,6 @@ const { User } = require("../models");
 const httpStatus = require("http-status");
 const ApiError = require("../utils/ApiError");
 const bcrypt = require("bcryptjs");
-const { objectId } = require("../validations/custom.validation");
 
 /**
  * Get User by id
@@ -22,7 +21,7 @@ const { objectId } = require("../validations/custom.validation");
  */
 
  const getUserByEmail = async (email) => {
-    return User.findOne(email).exec();
+    return User.findOne({email}).exec();
  };
 /**
  * Create a user
@@ -47,10 +46,10 @@ const { objectId } = require("../validations/custom.validation");
  */
 
  const createUser = async (user) => {
-    if(User.isEmailTaken(user.email)){
-        throw new ApiError(httpStatus.OK,"Email already taken");
-    }
-    return User.create(user);
+   if(await User.isEmailTaken(user.email)){
+      throw new ApiError(httpStatus.OK,"Email already taken");
+   }
+   return User.create(user);
  };
 
  module.exports = {

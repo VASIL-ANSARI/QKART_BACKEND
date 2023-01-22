@@ -2,6 +2,8 @@ const mongoose = require("mongoose");
 // NOTE - "validator" external library and not the custom middleware at src/middlewares/validate.js
 const validator = require("validator");
 const config = require("../config/config");
+const bcrypt = require("bcryptjs");
+const { func } = require("joi");
 
 const userSchema = mongoose.Schema(
   {
@@ -58,8 +60,21 @@ const userSchema = mongoose.Schema(
  * @returns {Promise<boolean>}
  */
 userSchema.statics.isEmailTaken = async function (email) {
-  (await User.find({email: email})).length !== 0;
+  return User.exists({email});
 };
+
+/**
+ * Check if entered password matches the user's password
+ * @param {string} password
+ * @returns {Promise<boolean>}
+ */
+userSchema.methods.isPasswordMatch = async function (password) {
+  //console.log(this);
+  const result = await bcrypt.compare(password,this.password);
+  //console.log(result);
+  return result;
+};
+
 
 
 /*
@@ -70,6 +85,20 @@ userSchema.statics.isEmailTaken = async function (email) {
 /**
  * @typedef User
  */
+userSchema.pre("save", function (next) {
+  const user = this;
+  //console.log(user.password);
+  bcrypt.genSalt(10,(err,salt) => {
+    if(err)
+    return next(err);
+
+    bcrypt.hash(user.password,salt,(err,hash) => {
+      if(err) return next(err);
+      user.password = hash;
+      next();
+    });
+  });
+});
 const User = mongoose.model('User', userSchema);
 module.exports = {
   User,
