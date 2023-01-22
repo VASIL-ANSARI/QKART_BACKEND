@@ -20,14 +20,6 @@ const loginUserWithEmailAndPassword = async (email, password) => {
   if(!user){
     throw new ApiError(httpStatus.UNAUTHORIZED,"Incorrect email or password");
   }
-  // let newuser = new User({
-  //   _id:user._id,
-  //   name: user.name,
-  //   email: user.email,
-  //   password: user.password,
-  //   walletMoney: user.walletMoney,
-  //   address: user.address,
-  // });
   const result = await user.isPasswordMatch(password);
   console.log(result);
   if(result){

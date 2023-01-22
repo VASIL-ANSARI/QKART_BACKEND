@@ -3,7 +3,6 @@ const mongoose = require("mongoose");
 const validator = require("validator");
 const config = require("../config/config");
 const bcrypt = require("bcryptjs");
-const { func } = require("joi");
 
 const userSchema = mongoose.Schema(
   {
